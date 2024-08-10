@@ -56,7 +56,7 @@ public class Script {
     public int gradeFour = 2400;
     public int gradeFive = 3000;
 
-    public int yourLevel;
+    public int yourLevel = 1000;
     public int battlesWon;
     public int gradeV;
     public int gradeIV;
@@ -261,17 +261,12 @@ public class Script {
             if (battlesWon < 4) for (int i = 0; i < battlesWon; i++) xpGain += HourglassLoweringExperience[i];
             else xpGain += HourglassLoweringExperience[4] + (battlesWon-4) * 3000;
         }
-/*
-        int usingGainedXp = xpGain;
-        int currentXp = ExperienceRequiredList[yourLevel];
-        while (usingGainedXp > currentXp) {
-            yourLevel++;
-            usingGainedXp -= currentXp;
-            currentXp = ExperienceRequiredList[yourLevel];
-        }
 
-        lbXpGain.setText("Xp gained: " + xpGain);
-        lbLevelGain.setText("Level Gained: " + yourLevel);*/
+    }
+
+    public int getRequiredXp() {
+        if (yourLevel < 100)  return ExperienceRequiredList[yourLevel];
+        else return 12600;
     }
 
 }
