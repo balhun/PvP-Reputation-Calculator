@@ -2,11 +2,13 @@ package hunor.program.pvpreputationcalculator;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 
 import java.util.ArrayList;
@@ -18,9 +20,19 @@ public class Script {
     public ImageView ImgProgress;
     public Image servant = new Image(getClass().getResourceAsStream("Images/progression-bg-servant.png"));
     public Image guardian = new Image(getClass().getResourceAsStream("Images/progression-bg-guardian.png"));
-    public TextField tfLevel;
-
-
+    public TextField tfLevelXp;
+    public Label lbXpRequired;
+    public TextField tfYourLevel;
+    public Label lbBattlesWon;
+    public Label lbGradeV;
+    public Label lbGradeIV;
+    public Label lbGradeIII;
+    public Label lbGradeII;
+    public Label lbGradeI;
+    public Label lbXpGain;
+    public Label lbLevelGain;
+    public TextField tfGoalLevel;
+    public CheckBox cbHourglassLowered;
 
 
     public int[] ExperienceRequiredList = {
@@ -34,8 +46,8 @@ public class Script {
     public int sumLevels;
 
     public int lossXp = 700;
-    public int[] SreakWinExperience = { 4200, 4675, 5190, 5688, 6600 }; // After 5 wins, you don't get increased experience from each successive win.
-    public int[] HourglassLoweringExperience = { 0, 1100, 2640, 4680, 7800 }; // +3000 xp after 4 streak
+    public int[] StreakWinExperience = { 4200, 4675, 5190, 5688, 6600, 26353 }; // After 5 wins, you don't get increased experience from each successive win.
+    public int[] HourglassLoweringExperience = { 1100, 2640, 4680, 7800, 16220 }; // +3000 xp after 4 streak
 
     //Flag Experience
     public int gradeOne = 600;
@@ -43,14 +55,23 @@ public class Script {
     public int gradeThree = 1800;
     public int gradeFour = 2400;
     public int gradeFive = 3000;
-    public Label lbXpRequired;
+
+    public int yourLevel;
+    public int battlesWon;
+    public int gradeV;
+    public int gradeIV;
+    public int gradeIII;
+    public int gradeII;
+    public int gradeI;
+    public int hourglassLowered;
+    public int xpGain;
+    public int levelGain;
 
 
     public void initialize() {
         choiceBox.getItems().addAll("Servant", "Guardian");
         choiceBox.setValue("Servant");
         choiceBox.setOnAction(this::getChoice);
-        lbLevel.setText("1.000");
         lbLevel.setFont(Font.loadFont(getClass().getResourceAsStream("Font/Windlass.ttf"), 40));
         lbXpRequired.setFont(Font.loadFont(getClass().getResourceAsStream("Font/Windlass.ttf"), 15));
         lbXpRequired.setText(calculateXpRequired() + " xp");
@@ -63,15 +84,23 @@ public class Script {
 
     public void onLevelSet(ActionEvent actionEvent) {
         try {
-            if (!tfLevel.getText().isEmpty()) {
-                int Intlevel = Integer.parseInt(tfLevel.getText());
-                if (Intlevel > 0 && Intlevel < 10000) {
-                    if (Intlevel > 999) {
-                        StringBuilder stringLevel = new StringBuilder(tfLevel.getText());
-                        stringLevel.insert(1, ".");
-                        lbLevel.setText(stringLevel.toString());
-                    } else { lbLevel.setText(tfLevel.getText()); }
-                    lbXpRequired.setText(calculateXpRequired() + " xp");
+            if (!tfLevelXp.getText().isEmpty() && !tfGoalLevel.getText().isEmpty()) {
+                int Intlevel = Integer.parseInt(tfLevelXp.getText());
+                int IntGoalLevel = Integer.parseInt(tfGoalLevel.getText());
+                if (Intlevel > 0 && Intlevel < 10000 && IntGoalLevel > Intlevel) {
+                    lbXpRequired.setText(calculateXpDifference(Intlevel, IntGoalLevel) + " xp");
+                }
+            }
+        } catch (Exception e) { System.out.println("e = " + e); }
+    }
+
+    public void onSetGoalLevel(ActionEvent actionEvent) {
+        try {
+            if (!tfLevelXp.getText().isEmpty() && !tfGoalLevel.getText().isEmpty()) {
+                int Intlevel = Integer.parseInt(tfLevelXp.getText());
+                int IntGoalLevel = Integer.parseInt(tfGoalLevel.getText());
+                if (IntGoalLevel > 0 && IntGoalLevel < 10000 && IntGoalLevel > Intlevel) {
+                    lbXpRequired.setText(calculateXpDifference(Intlevel, IntGoalLevel) + " xp");
                 }
             }
         } catch (Exception e) { System.out.println("e = " + e); }
@@ -83,14 +112,166 @@ public class Script {
         return sumLevels;
     }
 
+    public String calculateXpDifference(int currentIndex, int goalIndex) {
+        int sumLevelsCurrent = 0;
+        int sumLevelsGoal = 0;
+        if (currentIndex < 100) for (int i = 0; i < currentIndex; i++) sumLevelsCurrent += ExperienceRequiredList[i];
+        else {
+            sumLevelsCurrent = calcSumLevels(100) + (currentIndex-100) * 12600;
+        }
+        if (goalIndex < 100) for (int i = 0; i < goalIndex; i++) sumLevelsGoal += ExperienceRequiredList[i];
+        else {
+            sumLevelsGoal = calcSumLevels(100) + (goalIndex-100) * 12600;
+        }
+        int xpDifference = sumLevelsGoal - sumLevelsCurrent;
+        String strXp = String.format("%,d", xpDifference).replace(',', ' ');
+
+        return strXp;
+    }
+
     public String calculateXpRequired() {
         int xpRequired = 0;
-        int level = Integer.parseInt(tfLevel.getText());
+        int level = Integer.parseInt(tfLevelXp.getText());
         if (level < 100) xpRequired = calcSumLevels(level);
-        else {
-            xpRequired = calcSumLevels(100) + (level-100) * 12600;
-        }
+        else xpRequired = calcSumLevels(100) + (level-100) * 12600;
         String strXp = String.format("%,d", xpRequired).replace(',', ' ');
         return strXp;
     }
+
+    public void onUseYourLevel() {
+        try {
+            if (!tfYourLevel.getText().isEmpty()) {
+                int Intlevel = Integer.parseInt(tfYourLevel.getText());
+                if (Intlevel > 0 && Intlevel < 10000) {
+                    if (Intlevel > 999) {
+                        StringBuilder stringLevel = new StringBuilder(tfYourLevel.getText());
+                        stringLevel.insert(1, ".");
+                        lbLevel.setText(stringLevel.toString());
+                    } else { lbLevel.setText(tfYourLevel.getText()); }
+                    yourLevel = Intlevel;
+                }
+            }
+        } catch (Exception e) { System.out.println("e = " + e); }
+    }
+
+
+    public void onClickBattlesWonPlus() {
+        if (battlesWon < 99) battlesWon++;
+        lbBattlesWon.setText(battlesWon+"");
+
+        calculateXpGained();
+    }
+
+    public void onClickBattlesWonMinus() {
+        if (battlesWon > 0) battlesWon--;
+        lbBattlesWon.setText(battlesWon+"");
+
+        calculateXpGained();
+    }
+
+
+    public void onClickGradeVPlus() {
+        if (gradeV < 99) gradeV++;
+        lbGradeV.setText(gradeV+"");
+
+        calculateXpGained();
+    }
+
+    public void onClickGradeVMinus() {
+        if (gradeV > 0) gradeV--;
+        lbGradeV.setText(gradeV+"");
+
+        calculateXpGained();
+    }
+
+
+    public void onClickGradeIVPlus() {
+        if (gradeIV < 99) gradeIV++;
+        lbGradeIV.setText(gradeIV+"");
+
+        calculateXpGained();
+    }
+
+    public void onClickGradeIVMinus() {
+        if (gradeIV > 0) gradeIV--;
+        lbGradeIV.setText(gradeIV+"");
+
+        calculateXpGained();
+    }
+
+
+    public void onClickGradeIIIPlus() {
+        if (gradeIII < 99) gradeIII++;
+        lbGradeIII.setText(gradeIII+"");
+
+        calculateXpGained();
+    }
+
+    public void onClickGradeIIIMinus() {
+        if (gradeIII > 0) gradeIII--;
+        lbGradeIII.setText(gradeIII+"");
+
+        calculateXpGained();
+    }
+
+
+    public void onClickGradeIIPlus() {
+        if (gradeII < 99) gradeII++;
+        lbGradeII.setText(gradeII+"");
+
+        calculateXpGained();
+    }
+
+    public void onClickGradeIIMinus() {
+        if (gradeII > 0) gradeII--;
+        lbGradeII.setText(gradeII+"");
+
+        calculateXpGained();
+    }
+
+
+    public void onClickGradeIPlus() {
+        if (gradeI < 99) gradeI++;
+        lbGradeI.setText(gradeI+"");
+
+        calculateXpGained();
+    }
+
+    public void onClickGradeIMinus() {
+        if (gradeI > 0) gradeI--;
+        lbGradeI.setText(gradeI+"");
+
+        calculateXpGained();
+    }
+
+
+    public void onClickHourglassLowered(ActionEvent actionEvent) { calculateXpGained(); }
+
+
+    public void calculateXpGained() {
+        xpGain = 0;
+        if (battlesWon < StreakWinExperience.length) for (int i = 0; i < battlesWon; i++) xpGain += StreakWinExperience[i];
+        else xpGain = StreakWinExperience[5] + (battlesWon-5) * 6600;
+        xpGain += gradeV * gradeFive;
+        xpGain += gradeIV * gradeFour;
+        xpGain += gradeIII * gradeThree;
+        xpGain += gradeII * gradeTwo;
+        xpGain += gradeI * gradeOne;
+        if (cbHourglassLowered.isSelected()) {
+            if (battlesWon < 4) for (int i = 0; i < battlesWon; i++) xpGain += HourglassLoweringExperience[i];
+            else xpGain += HourglassLoweringExperience[4] + (battlesWon-4) * 3000;
+        }
+/*
+        int usingGainedXp = xpGain;
+        int currentXp = ExperienceRequiredList[yourLevel];
+        while (usingGainedXp > currentXp) {
+            yourLevel++;
+            usingGainedXp -= currentXp;
+            currentXp = ExperienceRequiredList[yourLevel];
+        }
+
+        lbXpGain.setText("Xp gained: " + xpGain);
+        lbLevelGain.setText("Level Gained: " + yourLevel);*/
+    }
+
 }
