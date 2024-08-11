@@ -217,12 +217,12 @@
       </HBox>
       <VBox alignment="BOTTOM_LEFT">
          <children>
-            <Label fx:id="lbLevelGain" text="Level gained:">
+            <Label fx:id="lbLevelGain" text="Level gained: 1000">
                <font>
                   <Font size="20.0" />
                </font>
             </Label>
-            <Label fx:id="lbXpGain" text="Xp gained:">
+            <Label fx:id="lbXpGain" text="Xp gained: 0">
                <font>
                   <Font size="20.0" />
                </font>

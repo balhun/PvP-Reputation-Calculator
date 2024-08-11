@@ -156,8 +156,8 @@ public class Script {
                     gradeI = 0;  lbGradeI.setText("0");
                     cbHourglassLowered.setSelected(false);
                     lbPotentialFlagXpLoss.setText("");
-                    lbXpGain.setText("Xp gained:");
-                    lbLevelGain.setText("Level gained:");
+                    lbXpGain.setText("Xp gained: 0");
+                    lbLevelGain.setText("Level gained:" + yourLevel);
                     lbPotentialXpLoss.setText("");
                 }
             }
