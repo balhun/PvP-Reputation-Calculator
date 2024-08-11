@@ -215,21 +215,38 @@
             <Insets />
          </VBox.margin>
       </HBox>
-      <VBox alignment="CENTER">
+      <VBox alignment="BOTTOM_LEFT">
          <children>
-            <Label fx:id="lbXpGain" text="Xp gained:">
+            <Label fx:id="lbLevelGain" text="Level gained:">
                <font>
                   <Font size="20.0" />
                </font>
             </Label>
-            <Label fx:id="lbLevelGain" text="Level Gained:">
+            <Label fx:id="lbXpGain" text="Xp gained:">
                <font>
                   <Font size="20.0" />
                </font>
             </Label>
          </children>
          <VBox.margin>
-            <Insets bottom="5.0" />
+            <Insets bottom="5.0" left="5.0" right="5.0" />
+         </VBox.margin>
+      </VBox>
+      <VBox alignment="BOTTOM_LEFT" layoutX="15.0" layoutY="298.0">
+         <children>
+            <Label fx:id="lbPotentialXpLoss">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbPotentialFlagXpLoss" alignment="CENTER_RIGHT">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+         </children>
+         <VBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" />
          </VBox.margin>
       </VBox>
    </children>

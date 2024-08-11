@@ -33,6 +33,8 @@ public class Script {
     public Label lbLevelGain;
     public TextField tfGoalLevel;
     public CheckBox cbHourglassLowered;
+    public Label lbPotentialXpLoss;
+    public Label lbPotentialFlagXpLoss;
 
 
     public int[] ExperienceRequiredList = {
@@ -45,7 +47,6 @@ public class Script {
 
     public int sumLevels;
 
-    public int lossXp = 700;
     public int[] StreakWinExperience = { 4200, 4675, 5190, 5688, 6600, 26353 }; // After 5 wins, you don't get increased experience from each successive win.
     public int[] HourglassLoweringExperience = { 1100, 2640, 4680, 7800, 16220 }; // +3000 xp after 4 streak
 
@@ -63,10 +64,7 @@ public class Script {
     public int gradeIII;
     public int gradeII;
     public int gradeI;
-    public int hourglassLowered;
     public int xpGain;
-    public int levelGain;
-
 
     public void initialize() {
         choiceBox.getItems().addAll("Servant", "Guardian");
@@ -91,7 +89,7 @@ public class Script {
                     lbXpRequired.setText(calculateXpDifference(Intlevel, IntGoalLevel) + " xp");
                 }
             }
-        } catch (Exception e) { System.out.println("e = " + e); }
+        } catch (Exception e) { }
     }
 
     public void onSetGoalLevel(ActionEvent actionEvent) {
@@ -149,9 +147,31 @@ public class Script {
                         lbLevel.setText(stringLevel.toString());
                     } else { lbLevel.setText(tfYourLevel.getText()); }
                     yourLevel = Intlevel;
+
+                    battlesWon = 0;  lbBattlesWon.setText("0");
+                    gradeV = 0;  lbGradeV.setText("0");
+                    gradeIV = 0;  lbGradeIV.setText("0");
+                    gradeIII = 0;  lbGradeIII.setText("0");
+                    gradeII = 0;  lbGradeII.setText("0");
+                    gradeI = 0;  lbGradeI.setText("0");
+                    cbHourglassLowered.setSelected(false);
+                    lbPotentialFlagXpLoss.setText("");
+                    lbXpGain.setText("Xp gained:");
+                    lbLevelGain.setText("Level gained:");
+                    lbPotentialXpLoss.setText("");
                 }
             }
-        } catch (Exception e) { System.out.println("e = " + e); }
+        } catch (Exception e) {}
+    }
+
+    public void setImageLevel(int level) {
+        if (level > 0 && level < 10000) {
+            if (level > 999) {
+                StringBuilder stringLevel = new StringBuilder(level+"");
+                stringLevel.insert(1, ".");
+                lbLevel.setText(stringLevel.toString());
+            } else { lbLevel.setText(level+""); }
+        }
     }
 
 
@@ -250,6 +270,8 @@ public class Script {
 
     public void calculateXpGained() {
         xpGain = 0;
+        int loweringLoss = 0;
+        int flagLoss = 0;
         if (battlesWon < StreakWinExperience.length) for (int i = 0; i < battlesWon; i++) xpGain += StreakWinExperience[i];
         else xpGain = StreakWinExperience[5] + (battlesWon-5) * 6600;
         xpGain += gradeV * gradeFive;
@@ -260,13 +282,39 @@ public class Script {
         if (cbHourglassLowered.isSelected()) {
             if (battlesWon < 4) for (int i = 0; i < battlesWon; i++) xpGain += HourglassLoweringExperience[i];
             else xpGain += HourglassLoweringExperience[4] + (battlesWon-4) * 3000;
-        }
+            lbPotentialXpLoss.setText("");
+        } else {
+            if (battlesWon < 4) for (int i = 0; i < battlesWon; i++) loweringLoss += HourglassLoweringExperience[i];
+            else loweringLoss += HourglassLoweringExperience[4] + (battlesWon-4) * 3000;
 
+            if (loweringLoss > 0) lbPotentialXpLoss.setText("Xp loss if sunk: " + loweringLoss);
+            else lbPotentialXpLoss.setText("");
+        }
+        flagLoss += gradeV * gradeFive;
+        flagLoss += gradeIV * gradeFour;
+        flagLoss += gradeIII * gradeThree;
+        flagLoss += gradeII * gradeTwo;
+        flagLoss += gradeI * gradeOne;
+
+        if (flagLoss > 0) lbPotentialFlagXpLoss.setText("Flag xp loss if sunk: " + flagLoss);
+        else lbPotentialFlagXpLoss.setText("");
+
+        lbXpGain.setText("Xp gained: " + xpGain);
+        lbLevelGain.setText("Level gained: " + reverseLvlSearch(xpGain));
     }
 
-    public int getRequiredXp() {
-        if (yourLevel < 100)  return ExperienceRequiredList[yourLevel];
-        else return 12600;
+    public int reverseLvlSearch(int xp) {
+        int i = yourLevel;
+        while (xp > 0) {
+            if (i < 100) xp -= ExperienceRequiredList[i];
+            else xp -= 12600;
+            System.out.println("xp = " + xp);
+            if (xp >= 0) {
+                i++;
+            }
+        }
+        setImageLevel(i);
+        return i;
     }
 
 }
