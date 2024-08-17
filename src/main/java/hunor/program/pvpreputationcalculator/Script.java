@@ -1,14 +1,14 @@
 package hunor.program.pvpreputationcalculator;
 
+import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.Arc;
 import javafx.scene.text.Font;
 
 import java.util.ArrayList;
@@ -35,13 +35,27 @@ public class Script {
     public CheckBox cbHourglassLowered;
     public Label lbPotentialXpLoss;
     public Label lbPotentialFlagXpLoss;
-
+    public Arc arc;
+    public CheckBox cbGoldAndGlory;
+    public Slider srXpSlider;
+    public Button battlesWonPlus;
+    public Button battlesWonMinus;
+    public Button gradeVPlus;
+    public Button gradeVMinus;
+    public Button gradeIVPlus;
+    public Button gradeIVMinus;
+    public Button gradeIIIPlus;
+    public Button gradeIIIMinus;
+    public Button gradeIIPlus;
+    public Button gradeIIMinus;
+    public Button gradeIPlus;
+    public Button gradeIMinus;
 
     public int[] ExperienceRequiredList = {
             0, 2000, 3278, 4033, 4618, 5108, 5535, 5919, 6267, 6590, 6890, 7171, 7437, 7690, 7929, 8160, 8381, 8593, 8797, 8995,
             9187, 9373, 9552, 9728, 9899, 10065, 10227, 10386, 10541, 10693, 10842, 10986, 11130, 11270, 11407, 11542, 11674, 11805, 11934, 12060,
-            12184, 12306, 12428, 12546, 12663, 12779, 0, 13005, 13117, 13227, 13335, 13443, 0, 13652, 0, 0, 13960, 0, 14159, 14257,
-            14353, 14450, 14545, 14639, 14732, 14825, 14916, 15006, 15097, 15186, 15274, 15361, 0, 15535, 15619, 15705, 15788, 15872, 15954, 16036,
+            12184, 12306, 12428, 12546, 12663, 12779, 12892, 13005, 13117, 13227, 13335, 13443, 13547, 13652, 13806, 13883, 13960, 14059, 14159, 14257,
+            14353, 14450, 14545, 14639, 14732, 14825, 14916, 15006, 15097, 15186, 15274, 15361, 15448, 15535, 15619, 15705, 15788, 15872, 15954, 16036,
             16118, 16198, 16279, 16359, 16437, 16516, 16593, 16672, 16747, 16825, 16900, 16975, 17050, 17124, 17199, 17271, 17344, 17417, 17489, 17560
     };
 
@@ -57,7 +71,7 @@ public class Script {
     public int gradeFour = 2400;
     public int gradeFive = 3000;
 
-    public int yourLevel = 1000;
+    public int yourLevel = 100;
     public int battlesWon;
     public int gradeV;
     public int gradeIV;
@@ -65,6 +79,10 @@ public class Script {
     public int gradeII;
     public int gradeI;
     public int xpGain;
+
+    public boolean levelSet = false;
+    public boolean xpSet = false;
+
 
     public void initialize() {
         choiceBox.getItems().addAll("Servant", "Guardian");
@@ -80,7 +98,7 @@ public class Script {
         else ImgProgress.setImage(guardian);
     }
 
-    public void onLevelSet(ActionEvent actionEvent) {
+    public void onLevelSet() {
         try {
             if (!tfLevelXp.getText().isEmpty() && !tfGoalLevel.getText().isEmpty()) {
                 int Intlevel = Integer.parseInt(tfLevelXp.getText());
@@ -92,7 +110,7 @@ public class Script {
         } catch (Exception e) { }
     }
 
-    public void onSetGoalLevel(ActionEvent actionEvent) {
+    public void onSetGoalLevel() {
         try {
             if (!tfLevelXp.getText().isEmpty() && !tfGoalLevel.getText().isEmpty()) {
                 int Intlevel = Integer.parseInt(tfLevelXp.getText());
@@ -148,6 +166,9 @@ public class Script {
                     } else { lbLevel.setText(tfYourLevel.getText()); }
                     yourLevel = Intlevel;
 
+                    levelSet = true;
+                    isLevelXpSet();
+
                     battlesWon = 0;  lbBattlesWon.setText("0");
                     gradeV = 0;  lbGradeV.setText("0");
                     gradeIV = 0;  lbGradeIV.setText("0");
@@ -156,21 +177,35 @@ public class Script {
                     gradeI = 0;  lbGradeI.setText("0");
                     cbHourglassLowered.setSelected(false);
                     lbPotentialFlagXpLoss.setText("");
-                    lbXpGain.setText("Xp gained: 0");
-                    lbLevelGain.setText("Level gained:" + yourLevel);
+                    lbXpGain.setText("");
+                    lbLevelGain.setText("");
                     lbPotentialXpLoss.setText("");
+                    srXpSlider.setDisable(false);
+                    srXpSlider.setValue(0);
+                    arc.setLength(360);
                 }
             }
         } catch (Exception e) {}
     }
 
-    public void setImageLevel(int level) {
-        if (level > 0 && level < 10000) {
-            if (level > 999) {
-                StringBuilder stringLevel = new StringBuilder(level+"");
-                stringLevel.insert(1, ".");
-                lbLevel.setText(stringLevel.toString());
-            } else { lbLevel.setText(level+""); }
+    public int onSliderDetected() {
+        if (srXpSlider.getValue() > 0.0 && srXpSlider.getValue() < 360.0) {
+            xpSet = true;
+            arc.setLength(360-srXpSlider.getValue());
+        } else {
+            xpSet = false;
+            arc.setLength(360-srXpSlider.getValue());
+        }
+
+
+        isLevelXpSet();
+
+        return translateAngleToXp(srXpSlider.getValue());
+    }
+
+    public void onSliderReleased() {
+        if (srXpSlider.getValue() > 0.0 && srXpSlider.getValue() < 360.0) {
+            srXpSlider.setDisable(true);
         }
     }
 
@@ -265,11 +300,105 @@ public class Script {
     }
 
 
-    public void onClickHourglassLowered(ActionEvent actionEvent) { calculateXpGained(); }
+    public void onClickHourglassLowered() { calculateXpGained(); }
+
+
+    public void onClickGoldAndGlory() { calculateXpGained(); }
+
+
+    public void setImageLevel(int level) {
+        if (level > 0 && level < 10000) {
+            if (level > 999) {
+                StringBuilder stringLevel = new StringBuilder(level+"");
+                stringLevel.insert(1, ".");
+                lbLevel.setText(stringLevel.toString());
+            } else { lbLevel.setText(level+""); }
+        }
+    }
+
+    public int reverseLvlSearch(int xp) {
+        int i = yourLevel;
+        while (xp > 0) {
+            if (i < 100) xp -= ExperienceRequiredList[i];
+            else xp -= 12600;
+            if (xp >= 0) {
+                i++;
+            }
+        }
+
+        int xpLeft = 0;
+        if (yourLevel < 100) xpLeft = xp + ExperienceRequiredList[i];
+        else xpLeft = xp + 12600;
+        xpLeft = Math.abs(xpLeft);
+        arc.setLength(360 - translateXpToAngle(xpLeft, i));
+        setImageLevel(i);
+        return i;
+    }
+
+    public int translateAngleToXp(double angle) {
+        double anglePercentage = angle / 360;
+        double xpPerAngle = 0;
+        if (yourLevel < 100) xpPerAngle = ExperienceRequiredList[yourLevel] * anglePercentage;
+        else xpPerAngle = 12600 * anglePercentage;
+
+        return (int) xpPerAngle;
+    }
+
+    public int translateXpToAngle(double xp, int level) {
+        double xpPercentage = 0;
+        if (level < 100) xpPercentage = xp / ExperienceRequiredList[level];
+        else xpPercentage = xp / 12600;
+
+        double anglePerXp = 0;
+        if ((360 * xpPercentage) == 360) anglePerXp = 0;
+        else anglePerXp = 360 * xpPercentage;
+
+        return (int) anglePerXp;
+    }
+
+    public void isLevelXpSet() {
+        if (levelSet && xpSet) {
+            battlesWonMinus.setDisable(false);
+            battlesWonPlus.setDisable(false);
+            gradeVPlus.setDisable(false);
+            gradeVMinus.setDisable(false);
+            gradeIVPlus.setDisable(false);
+            gradeIVMinus.setDisable(false);
+            gradeIIIPlus.setDisable(false);
+            gradeIIIMinus.setDisable(false);
+            gradeIIPlus.setDisable(false);
+            gradeIIMinus.setDisable(false);
+            gradeIPlus.setDisable(false);
+            gradeIMinus.setDisable(false);
+            cbHourglassLowered.setDisable(false);
+            cbGoldAndGlory.setDisable(false);
+
+        } else {
+            battlesWonMinus.setDisable(true);
+            battlesWonPlus.setDisable(true);
+            gradeVPlus.setDisable(true);
+            gradeVMinus.setDisable(true);
+            gradeIVPlus.setDisable(true);
+            gradeIVMinus.setDisable(true);
+            gradeIIIPlus.setDisable(true);
+            gradeIIIMinus.setDisable(true);
+            gradeIIPlus.setDisable(true);
+            gradeIIMinus.setDisable(true);
+            gradeIPlus.setDisable(true);
+            gradeIMinus.setDisable(true);
+            cbHourglassLowered.setDisable(true);
+            cbGoldAndGlory.setDisable(true);
+
+        }
+    }
+
+
+
 
 
     public void calculateXpGained() {
         xpGain = 0;
+
         int loweringLoss = 0;
         int flagLoss = 0;
         if (battlesWon < StreakWinExperience.length) for (int i = 0; i < battlesWon; i++) xpGain += StreakWinExperience[i];
@@ -299,22 +428,15 @@ public class Script {
         if (flagLoss > 0) lbPotentialFlagXpLoss.setText("Flag xp loss if sunk: " + flagLoss);
         else lbPotentialFlagXpLoss.setText("");
 
+
+        xpGain += onSliderDetected();
+
+        if (cbGoldAndGlory.isSelected()) xpGain *= 2;
+
+
+
         lbXpGain.setText("Xp gained: " + xpGain);
         lbLevelGain.setText("Level gained: " + reverseLvlSearch(xpGain));
-    }
-
-    public int reverseLvlSearch(int xp) {
-        int i = yourLevel;
-        while (xp > 0) {
-            if (i < 100) xp -= ExperienceRequiredList[i];
-            else xp -= 12600;
-            System.out.println("xp = " + xp);
-            if (xp >= 0) {
-                i++;
-            }
-        }
-        setImageLevel(i);
-        return i;
     }
 
 }
