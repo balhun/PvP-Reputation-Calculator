@@ -77,7 +77,7 @@
                               <Font size="16.0" />
                            </font>
                         </Label>
-                        <Slider fx:id="srXpSlider" max="360.0" onMouseDragged="#onSliderDetected" onMouseReleased="#onSliderReleased">
+                        <Slider fx:id="srXpSlider" disable="true" max="360.0" onMouseDragged="#onSliderDetected" onMouseReleased="#onSliderReleased">
                            <HBox.margin>
                               <Insets right="5.0" />
                            </HBox.margin></Slider>
