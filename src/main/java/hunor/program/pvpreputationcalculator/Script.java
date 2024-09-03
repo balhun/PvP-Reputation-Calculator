@@ -1,17 +1,11 @@
 package hunor.program.pvpreputationcalculator;
 
-import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.shape.Arc;
 import javafx.scene.text.Font;
-
-import java.util.ArrayList;
 
 public class Script {
 
@@ -197,7 +191,6 @@ public class Script {
             arc.setLength(360-srXpSlider.getValue());
         }
 
-
         isLevelXpSet();
 
         return translateAngleToXp(srXpSlider.getValue());
@@ -303,7 +296,10 @@ public class Script {
     public void onClickHourglassLowered() { calculateXpGained(); }
 
 
-    public void onClickGoldAndGlory() { calculateXpGained(); }
+    public void onClickGoldAndGlory() {
+        if (battlesWon > 0 || gradeV > 0 || gradeIV > 0 || gradeIII > 0 || gradeII > 0 || gradeI > 0) calculateXpGained();
+        else if (!cbGoldAndGlory.isSelected()) calculateXpGained();
+    }
 
 
     public void setImageLevel(int level) {
@@ -327,7 +323,7 @@ public class Script {
         }
 
         int xpLeft = 0;
-        if (yourLevel < 100) xpLeft = xp + ExperienceRequiredList[i];
+        if (i < 100) xpLeft = xp + ExperienceRequiredList[i];
         else xpLeft = xp + 12600;
         xpLeft = Math.abs(xpLeft);
         arc.setLength(360 - translateXpToAngle(xpLeft, i));
@@ -392,10 +388,6 @@ public class Script {
         }
     }
 
-
-
-
-
     public void calculateXpGained() {
         xpGain = 0;
 
@@ -428,12 +420,9 @@ public class Script {
         if (flagLoss > 0) lbPotentialFlagXpLoss.setText("Flag xp loss if sunk: " + flagLoss);
         else lbPotentialFlagXpLoss.setText("");
 
-
         xpGain += onSliderDetected();
 
         if (cbGoldAndGlory.isSelected()) xpGain *= 2;
-
-
 
         lbXpGain.setText("Xp gained: " + xpGain);
         lbLevelGain.setText("Level gained: " + reverseLvlSearch(xpGain));
